@@ -4,7 +4,7 @@ name: EC2 auto deploy
 on:
  push:
    branches:
-     - master
+     - main
 
  workflow_dispatch:
 
