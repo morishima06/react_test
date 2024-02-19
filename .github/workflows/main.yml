@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'   // Next.jsをビルドするのでNext.jsのセットアップをする（App Routerを使用するならnodeが古いバージョンだとエラーになるので注意）
+           node-version: '20'   // Next.jsをビルドするのでNext.jsのセットアップをする（App Routerを使用するならnodeが古いバージョンだとエラーになるので注意）
 
       - name: Install Dependencies
         run: |
