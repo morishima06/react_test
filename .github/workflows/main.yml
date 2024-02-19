@@ -1,62 +1,40 @@
-
-name: EC2 auto deploy
-
+name: Build and Deploy
 on:
- push:
-   branches:
-     - main
-
- workflow_dispatch:
+  push:
+    branches:
+      - main    // ここでmainブランチにpushされた時にgithubActionsがトリガーされるよと定義している
 
 jobs:
- build:
-   runs-on: ubuntu-latest
-   steps:
-     # IP取得ライブラリをインストール
-     - name: Public IP Install
-       id: ip
-       uses: haythem/public-ip@v1.2
+  build_and_deploy:
+    runs-on: ubuntu-latest    // githubActionsがどんな環境で動くか指定。今回はビルドしてEC2へのデプロイができればいいのでubuntuにしておきます。
 
-     # BranchをCheckout
-     - name: Checkout
-       uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
 
-     # AWS CLIをインストールする
-     - name: AWS CLI install
-       run: |
-         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-         unzip awscliv2.zip
-         sudo ./aws/install --update
-         aws --version
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'   // Next.jsをビルドするのでNext.jsのセットアップをする（App Routerを使用するならnodeが古いバージョンだとエラーになるので注意）
 
-     # AWS CLIにキーを設定をする
-     - name: AWS set Credentials
-       uses: aws-actions/configure-aws-credentials@v1
-       with:
-         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         aws-region: ap-northeast-1
+      - name: Install Dependencies
+        run: |
+          cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
+          npm install
 
-     - name: Install Dependencies
-       run: npm install
-
-     - name: Build
-       run: npm run build  # React ビルド
-
-
-
-     # デプロイする
-     - name: Deploy
-       run: |
-
-         # SSHのセキュリティグループを開放す
-         aws ec2 authorize-security-group-ingress --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
-
-         # SSH接続して、git pullする
-         echo "${{ secrets.GIT_PRIVATE_KEY }}" > private_key
-         chmod 600 private_key
-         ssh -oStrictHostKeyChecking=no ${{ secrets.EC2_USER_NAME }}@${{ secrets.EC2_HOST_NAME }} -i private_key "cd /var/www && git fetch --prune && git checkout main && git pull origin main"
-
-         # SSHのセキュリティグループを閉じる
-         aws ec2 revoke-security-group-ingress --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
-
+      - name: Build
+        run: |
+          cd 【package.jsonまでのパス】
+          npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
+          
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.GIT_PRIVATE_KEY }}   // 上で設定したシークレットの情報
+          HOST: ${{ secrets.EC2_HOST_NAME }}
+          USER: ${{ secrets.EC2_USER_NAME }}
+        run: |
+          cd 【package.jsonまでのパス】
+          echo "$PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www   // scpコマンドでEC2にoutディレクトリの中身をコピーしてる
+          rm -f private_key
