@@ -20,7 +20,7 @@ jobs:
       - name: Install Dependencies
         run: |
           ls
-          cd 
+          cd /home/runner/package.json
           npm install
 
       - name: Build
