@@ -2,21 +2,21 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - main    // ここでmainブランチにpushされた時にgithubActionsがトリガーされるよと定義している
+      - main
 
 jobs:
   build_and_deploy:
-    runs-on: ubuntu-latest    // githubActionsがどんな環境で動くか指定。今回はビルドしてEC2へのデプロイができればいいのでubuntuにしておきます。
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
+        uses: actions/checkout@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
-          
+          node-version: '20'
+
       - name: Install Dependencies
         run: |
           cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
