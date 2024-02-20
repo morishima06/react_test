@@ -34,6 +34,6 @@ jobs:
           ls
           echo "$PRIVATE_KEY" > private_key
           chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key -r  $USER@$HOST:/var/www
+          scp -o StrictHostKeyChecking=no -i private_key -r ./build $USER@$HOST:/var/www
           rm -f private_key
 
