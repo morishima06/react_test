@@ -19,12 +19,13 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd 【package.jsonまでのパス】
+          ls
+          cd 
           npm install
 
       - name: Build
         run: |
-          cd 【package.jsonまでのパス】
+          cd
           npm run build
           
       - name: Deploy to EC2
@@ -33,7 +34,7 @@ jobs:
           HOST: ${{ secrets.EC2_HOST_NAME }}
           USER: ${{ secrets.EC2_USER_NAME }}
         run: |
-          cd 【package.jsonまでのパス】
+          cd
           echo "$PRIVATE_KEY" > private_key
           chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www
