@@ -22,10 +22,10 @@ jobs:
           cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
           npm install
 
-      - name: Build
-        run: |
-          cd 【package.jsonまでのパス】
-          npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
+      # - name: Build
+      #   run: |
+      #     cd 【package.jsonまでのパス】
+      #     npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
           
       # - name: Deploy to EC2
       #   env:
