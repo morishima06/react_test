@@ -23,7 +23,6 @@ jobs:
 
       - name: Build
         run: |
-          cd
           npm run build
           
       - name: Deploy to EC2
