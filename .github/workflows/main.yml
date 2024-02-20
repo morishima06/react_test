@@ -28,10 +28,10 @@ jobs:
           npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
           
       - name: Deploy to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.GIT_PRIVATE_KEY }}   // 上で設定したシークレットの情報
-          HOST: ${{ secrets.EC2_HOST_NAME }}
-          USER: ${{ secrets.EC2_USER_NAME }}
+        # env:
+        #   PRIVATE_KEY: ${{ secrets.GIT_PRIVATE_KEY }}   // 上で設定したシークレットの情報
+        #   HOST: ${{ secrets.EC2_HOST_NAME }}
+        #   USER: ${{ secrets.EC2_USER_NAME }}
         run: |
           cd 【package.jsonまでのパス】
           echo "$PRIVATE_KEY" > private_key
