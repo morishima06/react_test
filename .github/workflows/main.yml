@@ -19,23 +19,23 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
+          cd 【package.jsonまでのパス】
           npm install
 
       - name: Build
         run: |
           cd 【package.jsonまでのパス】
-          npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
+          npm run build
           
       - name: Deploy to EC2
         env:
-          PRIVATE_KEY: ${{ secrets.GIT_PRIVATE_KEY }}   // 上で設定したシークレットの情報
+          PRIVATE_KEY: ${{ secrets.GIT_PRIVATE_KEY }}
           HOST: ${{ secrets.EC2_HOST_NAME }}
           USER: ${{ secrets.EC2_USER_NAME }}
         run: |
           cd 【package.jsonまでのパス】
           echo "$PRIVATE_KEY" > private_key
           chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www/   // scpコマンドでEC2にoutディレクトリの中身をコピーしてる
+          scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www
           rm -f private_key
 
