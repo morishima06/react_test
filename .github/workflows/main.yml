@@ -12,3 +12,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'   // Next.jsをビルドするのでNext.jsのセットアップをする（App Routerを使用するならnodeが古いバージョンだとエラーになるので注意）
+
+      - name: Install Dependencies
+        run: |
+          cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
+          npm install
+
+      - name: Build
+        run: |
+          cd 【package.jsonまでのパス】
+          npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
+          
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}   // 上で設定したシークレットの情報
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          cd 【package.jsonまでのパス】
+          echo "$PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www/html/   // scpコマンドでEC2にoutディレクトリの中身をコピーしてる
+          rm -f private_key
+
