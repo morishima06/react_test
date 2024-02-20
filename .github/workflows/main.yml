@@ -8,9 +8,9 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest    // githubActionsがどんな環境で動くか指定。今回はビルドしてEC2へのデプロイができればいいのでubuntuにしておきます。
 
-    # steps:
-    #   - name: Checkout code
-    #     uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
 
     #   - name: Setup Node.js
     #     uses: actions/setup-node@v2
