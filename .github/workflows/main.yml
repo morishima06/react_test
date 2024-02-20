@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+          
       - name: Install Dependencies
         run: |
           cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
