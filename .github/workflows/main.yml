@@ -1,41 +1,42 @@
-name: Build and Deploy
+name: Deploy GitHub Pages
+
 on:
   push:
-    branches:
-      - main    // ここでmainブランチにpushされた時にgithubActionsがトリガーされるよと定義している
+    branches: ['main']
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
 
 jobs:
-  build_and_deploy:
-    runs-on: ubuntu-latest    // githubActionsがどんな環境で動くか指定。今回はビルドしてEC2へのデプロイができればいいのでubuntuにしておきます。
-
+  build:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2    // おまじない。githubActions上でこのリポジトリのコード使うよ～とチェックアウトする…みたいな意味らしい。
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'   // Next.jsをビルドするのでNext.jsのセットアップをする（App Routerを使用するならnodeが古いバージョンだとエラーになるので注意）
-
-      - name: Install Dependencies
-        run: |
-          cd 【package.jsonまでのパス】   // package.jsonがある場所まで移動する。（他の人もそうなのかわからないが自分の場合「/home/runner/work/自分で作ったルートディレクトリ」となっていた）
-          npm install
-
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
       - name: Build
-        run: |
-          cd 【package.jsonまでのパス】
-          npm run build   // ビルドします。SSGの場合静的ファイルはoutってフォルダに出力される
-          
-      - name: Deploy to EC2
+        run: npm ci && npm run build
         env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}   // 上で設定したシークレットの情報
-          HOST: ${{ secrets.EC2_HOST }}
-          USER: ${{ secrets.EC2_USER }}
-        run: |
-          cd 【package.jsonまでのパス】
-          echo "$PRIVATE_KEY" > private_key
-          chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key -r ./out $USER@$HOST:/var/www/html/   // scpコマンドでEC2にoutディレクトリの中身をコピーしてる
-          rm -f private_key
-
+          PUBLIC_URL: /Example_App
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: './build'
